@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Level } from '../types'
 import { useProgress } from '../game/progress'
 import { checkFlag } from '../game/flag'
@@ -21,6 +21,16 @@ export function LevelView({
   const [status, setStatus] = useState<'idle' | 'wrong'>('idle')
   const [justSolved, setJustSolved] = useState(false)
   const [discovery, setDiscovery] = useState<string | null>(null)
+  const discoveryTimer = useRef<number | undefined>(undefined)
+
+  // Clear any pending toast timer on unmount.
+  useEffect(() => () => window.clearTimeout(discoveryTimer.current), [])
+
+  function showDiscovery(note: string) {
+    setDiscovery(note)
+    window.clearTimeout(discoveryTimer.current)
+    discoveryTimer.current = window.setTimeout(() => setDiscovery(null), 2200)
+  }
 
   const solved = alreadySolved || justSolved
   const Sandbox = level.Sandbox
@@ -83,12 +93,7 @@ export function LevelView({
           </div>
 
           <div className="relative">
-            <Sandbox
-              onDiscover={(note) => {
-                setDiscovery(note)
-                window.setTimeout(() => setDiscovery(null), 2200)
-              }}
-            />
+            <Sandbox onDiscover={showDiscovery} />
             {discovery && (
               <div className="float-up pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-neon px-3 py-1 text-xs font-semibold text-bg">
                 {discovery}

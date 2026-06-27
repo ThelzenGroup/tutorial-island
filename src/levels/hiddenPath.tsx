@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Level, SandboxProps } from '../types'
 import { BrowserFrame } from '../components/ui'
 
@@ -17,9 +17,15 @@ function pathOf(url: string): string {
 function Sandbox({ onDiscover }: SandboxProps) {
   const [url, setUrl] = useState(`${HOST}/`)
   const path = pathOf(url)
+  const lower = path.toLowerCase()
+  const onSecret = lower === SECRET_PATH || lower === `${SECRET_PATH}/`
+
+  useEffect(() => {
+    if (onSecret) onDiscover?.('You found the hidden staff portal.')
+  }, [onSecret, onDiscover])
 
   function render() {
-    if (path === '/' || path.toLowerCase() === '/index.html') {
+    if (path === '/' || lower === '/index.html') {
       return (
         <div className="p-6 font-sans">
           <h1 className="text-2xl font-bold text-slate-800">ACME Corp</h1>
@@ -30,7 +36,7 @@ function Sandbox({ onDiscover }: SandboxProps) {
         </div>
       )
     }
-    if (path.toLowerCase() === '/robots.txt') {
+    if (lower === '/robots.txt') {
       return (
         <pre className="bg-white p-5 font-mono text-sm text-slate-800">
           {`User-agent: *
@@ -40,8 +46,7 @@ Disallow: ${SECRET_PATH}
         </pre>
       )
     }
-    if (path === SECRET_PATH || path === `${SECRET_PATH}/`) {
-      onDiscover?.('You found the hidden staff portal.')
+    if (onSecret) {
       return (
         <div className="p-6 font-sans">
           <h1 className="text-xl font-bold text-rose-600">
