@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Level } from '../types'
 import { useProgress } from '../game/progress'
 import { checkFlag } from '../game/flag'
@@ -26,11 +26,11 @@ export function LevelView({
   // Clear any pending toast timer on unmount.
   useEffect(() => () => window.clearTimeout(discoveryTimer.current), [])
 
-  function showDiscovery(note: string) {
+  const showDiscovery = useCallback((note: string) => {
     setDiscovery(note)
     window.clearTimeout(discoveryTimer.current)
     discoveryTimer.current = window.setTimeout(() => setDiscovery(null), 2200)
-  }
+  }, [])
 
   const solved = alreadySolved || justSolved
   const Sandbox = level.Sandbox
